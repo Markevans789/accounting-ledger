@@ -1,8 +1,7 @@
 package com.pluralsight;
 
-import com.puralsight.Transaction;
-
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
@@ -41,7 +40,7 @@ public class FinancialTracker {
     /* ------------------------------------------------------------------
        Main menu
        ------------------------------------------------------------------ */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         loadTransactions(FILE_NAME);
 
         Scanner scanner = new Scanner(System.in);
@@ -77,75 +76,63 @@ public class FinancialTracker {
      * • If the file doesn’t exist, create an empty one so that future writes succeed.
      * • Each line looks like: date|time|description|vendor|amount
      */
-    public static void loadTransactions(String fileName) {
-        // TODO: create file if it does not exist, then read each line,
-        //       parse the five fields, build a Transaction object,
-        //       and add it to the transactions list.
+    public static void loadTransactions(String fileName) throws IOException {
+        File file = new File(fileName);
+
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        Scanner scanner = new Scanner(file);
+
+        // read file here
+
+        scanner.close();
     }
 
-    /* ------------------------------------------------------------------
-       Add new transactions
-       ------------------------------------------------------------------ */
+    private static void addDeposit(Scanner scanner) {
 
-    /**
-     * Prompt for ONE date+time string in the format
-     * "yyyy-MM-dd HH:mm:ss", plus description, vendor, amount.
-     * Validate that the amount entered is positive.
-     * Store the amount as-is (positive) and append to the file.
-     */
-    private static void addDeposit(Scanner scanner){
+        System.out.print("Enter date and time (mm-dd-yyyy HH:mm:ss): ");
+        String dateTime = scanner.nextLine();
 
-        System.out.print("Description: ");
+        System.out.print("Enter descripion: ");
         String description = scanner.nextLine();
 
-        System.out.print("Vendor: ");
+        System.out.print("Enter vendor: ");
         String vendor = scanner.nextLine();
 
-        System.out.print("Amount: ");
-        double amount =
-                Double.parseDouble(scanner.nextLine());
+        double amount;
 
-        Transaction transaction =
-                new Transaction(
-                        LocalDate.now(),
-                        LocalTime.now(),
-                        description,
-                        vendor,
-                        amount
-                );
-        transactions.add(transaction);
+        System.out.print("Enter amount: ");
+        amount = Double.parseDouble(scanner.nextLine());
 
-        System.out.println("Deposit Added!");
+        if (amount <= 0) {
+            System.out.print("Amount must be positive.");
+
+        }
     }
-
 
     private static void addPayment(Scanner scanner) {
-        System.out.print("Description: ");
+        System.out.print("Enter date and time (MM-dd-yyyy HH:mm:ss): ");
+        String dateTime = scanner.nextLine();
+
+        System.out.print("Enter description: ");
         String description = scanner.nextLine();
 
-        System.out.print("Vendor: ");
+        System.out.print("Enter vendor: ");
         String vendor = scanner.nextLine();
 
-        System.out.print("Amount: ");
-        double amount =
-                Double.parseDouble(scanner.nextLine());
+        double amount;
 
-        Transaction transaction =
-                new Transaction(
-                        LocalDate.now(),
-                        LocalTime.now(),
-                        description,
-                        vendor,
-                        amount
-                );
-        transactions.add(transaction);
+        System.out.print("Enter amount");
+        amount = Double.parseDouble(scanner.nextLine());
 
-        System.out.println("Payment Added!");
-    }
+        if (amount <=0){
+            System.out.println("Amount must be positive.");
+        }
 
-    /* ------------------------------------------------------------------
-       Ledger menu
-       ------------------------------------------------------------------ */
+}
+
     private static void ledgerMenu(Scanner scanner) {
         boolean running = true;
         while (running) {
@@ -173,19 +160,7 @@ public class FinancialTracker {
     /* ------------------------------------------------------------------
        Display helpers: show data in neat columns
        ------------------------------------------------------------------ */
-    private static void displayLedger() {
-        for (Transaction t : transactions) {
-
-            System.out.printf(
-                    "%s %s %-15s %-15s $%.2f%n",
-                    t.getAmount(),
-                    t.getVendor(),
-                    t.getDescription(),
-                    t.getDate(),
-                    t.getTime()
-            );
-        }
-    }
+    private static void displayLedger() { /* TODO – print all transactions in column format, newest first */ }
 
     private static void displayDeposits() { /* TODO – only amount > 0               */ }
 
