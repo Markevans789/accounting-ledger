@@ -2,11 +2,13 @@ package com.pluralsight;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.time.format.DateTimeParseException;
 
 public class FinancialTracker {
 
@@ -23,6 +25,9 @@ public class FinancialTracker {
     private static final DateTimeFormatter DATE_FMT = DateTimeFormatter.ofPattern(DATE_PATTERN);
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern(TIME_PATTERN);
     private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern(DATETIME_PATTERN);
+    private static Instant date;
+    private static boolean t;
+    private static LocalDate prviousMonth;
 
     /* ------------------------------------------------------------------
        Main menu
@@ -230,19 +235,50 @@ public class FinancialTracker {
         }
     }
 
+    private static void displayPreviousMonth() {
+        Object previousMonth = null;
+        LocalDate start = LocalDate.of(prviousMonth.getYear(), previousMonth.getMonthValue, 1);
+        
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+        
+        filterTransactionsByDate(start,end);
+    }
+
     private static void displayVendorReport(Scanner scanner) {
+        System.out.print("Enter vendor name: ");
+        String vendor = scanner.nextLine();
+
+        filterTransactionsByVendor(vendor);
     }
 
     private static void displayPreviousYear() {
+        LocalDate start = LocalDate.of(LocalDate.now().getYear() - 1, 1, 1);
+
+        LocalDate end = LocalDate.of(LocalDate.now().getYear() - 1, 12, 31);
+
+        filterTransactionsByDate(start, end);
     }
 
     private static void displayYearToDate() {
-    }
+        LocalDate start = LocalDate.of(
+                LocalDate.now().getYear(), 1, 1);
 
-    private static void displayPreviousMonth() {
+        LocalDate end = LocalDate.now();
+
+        filterTransactionsByDate(start, end);
     }
 
     private static void displayMonthtoDate() {
+        LocalDate previousMonth = LocalDate.now().minusMonths(1);
+
+        LocalDate start = LocalDate.of(
+                previousMonth.getYear(),
+                previousMonth.getMonthValue(),
+                1);
+
+        LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
+
+        filterTransactionsByDate(start, end);
     }
 
 
@@ -252,7 +288,10 @@ public class FinancialTracker {
     private static void filterTransactionsByDate(LocalDate start, LocalDate end) {
         for (Transaction t : transactions){
             String date = t.getDate();
-            LocalDate date = t.getDate();
+            String localDate = t.getDate();
+        }
+        if (date.isBefore(Instant.from(start)) & date.isAfter(Instant.from(end))){
+            System.out.println(t);
         }
 
     }
@@ -287,12 +326,10 @@ public class FinancialTracker {
        Utility parsers (you can reuse in many places)
        ------------------------------------------------------------------ */
     private static LocalDate parseDate(String s) {
-        /* TODO – return LocalDate or null */
-        return null;
+       return LocalDate.parse(s);
     }
 
     private static Double parseDouble(String s) {
-        /* TODO – return Double   or null */
-        return null;
+        return Double.parseDouble(s);
     }
 }
