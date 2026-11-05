@@ -8,19 +8,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-/*
- * Capstone skeleton – personal finance tracker.
- * ------------------------------------------------
- * File format  (pipe-delimited)
- *     yyyy-MM-dd|HH:mm:ss|description|vendor|amount
- * A deposit has a positive amount; a payment is stored
- * as a negative amount.
- *
- * TODO: create the Transaction class in this package first.
- *       One object = one line of the file. Decide its fields from
- *       the file format above, add a constructor and getters.
- *       This class does not compile until Transaction exists.
- */
 public class FinancialTracker {
 
     /* ------------------------------------------------------------------
@@ -79,60 +66,71 @@ public class FinancialTracker {
     public static void loadTransactions(String fileName) throws IOException {
         File file = new File(fileName);
 
+        // Create file if it does not exist
         if (!file.exists()) {
             file.createNewFile();
         }
 
-        Scanner scanner = new Scanner(file);
+        Scanner fileScanner = new Scanner(file);
 
-        // read file here
+        while (fileScanner.hasNextLine()) {
+            String line = fileScanner.nextLine();
 
-        scanner.close();
-    }
+            String[] parts = line.split("\\|");
 
-    private static void addDeposit(Scanner scanner) {
+            if (parts.length == 5) {
+                String date = parts[0];
+                String time = parts[1];
+                String description = parts[2];
+                String vendor = parts[3];
+                double amount = Double.parseDouble(parts[4]);
 
-        System.out.print("Enter date and time (mm-dd-yyyy HH:mm:ss): ");
-        String dateTime = scanner.nextLine();
+                Transaction transaction =
+                        new Transaction(date, time, description, vendor, amount);
 
-        System.out.print("Enter descripion: ");
-        String description = scanner.nextLine();
-
-        System.out.print("Enter vendor: ");
-        String vendor = scanner.nextLine();
-
-        double amount;
-
-        System.out.print("Enter amount: ");
-        amount = Double.parseDouble(scanner.nextLine());
-
-        if (amount <= 0) {
-            System.out.print("Amount must be positive.");
-
+                transactions.add(transaction);
+            }
         }
+
+        fileScanner.close();
     }
 
-    private static void addPayment(Scanner scanner) {
-        System.out.print("Enter date and time (MM-dd-yyyy HH:mm:ss): ");
-        String dateTime = scanner.nextLine();
+    /* ------------------------------------------------------------------
+       Add new transactions
+       ------------------------------------------------------------------ */
 
+    /**
+     * Prompt for ONE date+time string in the format
+     * "yyyy-MM-dd HH:mm:ss", plus description, vendor, amount.
+     * Validate that the amount entered is positive.
+     * Store the amount as-is (positive) and append to the file.
+     */
+    private static void addDeposit(Scanner scanner) {
         System.out.print("Enter description: ");
         String description = scanner.nextLine();
 
         System.out.print("Enter vendor: ");
         String vendor = scanner.nextLine();
 
-        double amount;
+        System.out.print("Enter amount: ");
+        double amount = Double.parseDouble(scanner.nextLine());
 
-        System.out.print("Enter amount");
-        amount = Double.parseDouble(scanner.nextLine());
+        System.out.println("Deposit added successfully!");    }
 
-        if (amount <=0){
-            System.out.println("Amount must be positive.");
-        }
+    private static void addPayment(Scanner scanner) {
+        System.out.print("Enter description: ");
+        String description = scanner.nextLine();
 
-}
+        System.out.print("Enter vendor: ");
+        String vendor = scanner.nextLine();
 
+        System.out.print("Enter amount: ");
+        double amount = Double.parseDouble(scanner.nextLine());
+    }
+
+    /* ------------------------------------------------------------------
+       Ledger menu
+       ------------------------------------------------------------------ */
     private static void ledgerMenu(Scanner scanner) {
         boolean running = true;
         while (running) {
@@ -160,11 +158,46 @@ public class FinancialTracker {
     /* ------------------------------------------------------------------
        Display helpers: show data in neat columns
        ------------------------------------------------------------------ */
-    private static void displayLedger() { /* TODO – print all transactions in column format, newest first */ }
+    private static void displayLedger() { System.out.println("=== Ledger ===");
 
-    private static void displayDeposits() { /* TODO – only amount > 0               */ }
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+            System.out.println(transactions.get(i));
+        }
+        Transaction t = null;
+        System.out.println(
+                t.getDate() + "\t" +
+                        t.getTime() + "\t" +
+                        t.getDescription() + "\t" +
+                        t.getVendor() + "\t" +
+                        t.getAmount()
+        );
+    }
 
-    private static void displayPayments() { /* TODO – only amount < 0               */ }
+    private static void displayDeposits() {  System.out.println("=== Deposits ===");
+
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+
+            Transaction t = transactions.get(i);
+
+            if (t.getAmount() > 0) {
+                System.out.println(t);
+            }
+        }
+    }
+
+    private static void displayPayments() {
+        System.out.println("=== Payments ===");
+
+        for (int i = transactions.size() - 1; i >= 0; i--) {
+
+            Transaction t = transactions.get(i);
+
+            if (t.getAmount() < 0) {
+                System.out.println(t);
+            }
+
+    }
+}
 
     /* ------------------------------------------------------------------
        Reports menu
@@ -185,11 +218,11 @@ public class FinancialTracker {
             String input = scanner.nextLine().trim();
 
             switch (input) {
-                case "1" -> {/* TODO – month-to-date report */ }
-                case "2" -> {/* TODO – previous month report */ }
-                case "3" -> {/* TODO – year-to-date report   */ }
-                case "4" -> {/* TODO – previous year report  */ }
-                case "5" -> {/* TODO – prompt for vendor then report */ }
+                case "1" -> {displayMonthtoDate();}
+                case "2" -> {displayPreviousMonth();}
+                case "3" -> {displayYearToDate();}
+                case "4" -> {displayPreviousYear();}
+                case "5" -> {displayVendorReport(scanner);}
                 case "6" -> customSearch(scanner);
                 case "0" -> running = false;
                 default -> System.out.println("Invalid option");
@@ -197,20 +230,57 @@ public class FinancialTracker {
         }
     }
 
+    private static void displayVendorReport(Scanner scanner) {
+    }
+
+    private static void displayPreviousYear() {
+    }
+
+    private static void displayYearToDate() {
+    }
+
+    private static void displayPreviousMonth() {
+    }
+
+    private static void displayMonthtoDate() {
+    }
+
+
     /* ------------------------------------------------------------------
        Reporting helpers
        ------------------------------------------------------------------ */
     private static void filterTransactionsByDate(LocalDate start, LocalDate end) {
-        // TODO – iterate transactions, print those within the range
+        for (Transaction t : transactions){
+            String date = t.getDate();
+            LocalDate date = t.getDate();
+        }
+
     }
 
     private static void filterTransactionsByVendor(String vendor) {
-        // TODO – iterate transactions, print those with matching vendor
+        for (Transaction t : transactions){
+            if (t.getVendor().equalsIgnoreCase(vendor)){
+                System.out.println(t);
+            }
+        }
     }
 
     private static void customSearch(Scanner scanner) {
-        // TODO – prompt for any combination of date range, description,
-        //        vendor, and exact amount, then display matches
+        System.out.print("Vendor (leave black to skip): ");
+        String vendor = scanner.nextLine();
+
+        System.out.print("Description (leave black to skip):");
+
+        String description = scanner.nextLine();
+
+        System.out.print("Amount (leave blank)");
+        String amountInput = scanner.nextLine();
+
+        Double amount = null;
+        if(!amountInput.isBlank()) {
+            amount = Double.parseDouble(amountInput);
+        }
+        
     }
 
     /* ------------------------------------------------------------------
