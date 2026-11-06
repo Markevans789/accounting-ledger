@@ -59,15 +59,6 @@ public class FinancialTracker {
         scanner.close();
     }
 
-    /* ------------------------------------------------------------------
-       File I/O
-       ------------------------------------------------------------------ */
-
-    /**
-     * Load transactions from FILE_NAME.
-     * • If the file doesn’t exist, create an empty one so that future writes succeed.
-     * • Each line looks like: date|time|description|vendor|amount
-     */
     public static void loadTransactions(String fileName) throws IOException {
         File file = new File(fileName);
 
@@ -100,16 +91,6 @@ public class FinancialTracker {
         fileScanner.close();
     }
 
-    /* ------------------------------------------------------------------
-       Add new transactions
-       ------------------------------------------------------------------ */
-
-    /**
-     * Prompt for ONE date+time string in the format
-     * "yyyy-MM-dd HH:mm:ss", plus description, vendor, amount.
-     * Validate that the amount entered is positive.
-     * Store the amount as-is (positive) and append to the file.
-     */
     private static void addDeposit(Scanner scanner) {
         System.out.print("Enter description: ");
         String description = scanner.nextLine();
@@ -120,9 +101,27 @@ public class FinancialTracker {
         System.out.print("Enter amount: ");
         double amount = Double.parseDouble(scanner.nextLine());
 
-        System.out.println("Deposit added successfully!");    }
+        if (amount <=0) {
+            System.out.println("Amount must be positive");
+                    return;
+        }
+
+        String dateTime = "";
+        String[] parts = dateTime.split("");
+        LocalDate date = LocalDate.parse(parts[0]);
+        LocalTime time = LocalTime.parse(parts[1]);
+
+        Transaction deposit = new Transaction(amount, date, vendor, time, description);
+
+        transactions.add(deposit);
+
+        System.out.println("Deposit added successfully!");
+    }
 
     private static void addPayment(Scanner scanner) {
+        System.out.print("Enter date and time (MM-dd-yyyy): ");
+        String dateTime = scanner.nextLine();
+
         System.out.print("Enter description: ");
         String description = scanner.nextLine();
 
@@ -131,11 +130,22 @@ public class FinancialTracker {
 
         System.out.print("Enter amount: ");
         double amount = Double.parseDouble(scanner.nextLine());
+
+        if (amount <=0){
+            System.out.println("Amount must be positive.");
+            return;
+        }
+
+        // Make payment amount negative
+        amount = -amount;
+
+        Transaction payment = new Transaction(amount, dateTime, vendor, description);
+
+        transactions.add(payment);
+
+        System.out.println("Payment added successfully!");
     }
 
-    /* ------------------------------------------------------------------
-       Ledger menu
-       ------------------------------------------------------------------ */
     private static void ledgerMenu(Scanner scanner) {
         boolean running = true;
         while (running) {
@@ -160,9 +170,6 @@ public class FinancialTracker {
         }
     }
 
-    /* ------------------------------------------------------------------
-       Display helpers: show data in neat columns
-       ------------------------------------------------------------------ */
     private static void displayLedger() { System.out.println("=== Ledger ===");
 
         for (int i = transactions.size() - 1; i >= 0; i--) {
@@ -204,9 +211,6 @@ public class FinancialTracker {
     }
 }
 
-    /* ------------------------------------------------------------------
-       Reports menu
-       ------------------------------------------------------------------ */
     private static void reportsMenu(Scanner scanner) {
         boolean running = true;
         while (running) {
@@ -237,7 +241,7 @@ public class FinancialTracker {
 
     private static void displayPreviousMonth() {
         Object previousMonth = null;
-        LocalDate start = LocalDate.of(prviousMonth.getYear(), previousMonth.getMonthValue, 1);
+        LocalDate start = LocalDate.ofYearDay(prviousMonth.getYear(), 1);
         
         LocalDate end = start.withDayOfMonth(start.lengthOfMonth());
         
@@ -281,10 +285,6 @@ public class FinancialTracker {
         filterTransactionsByDate(start, end);
     }
 
-
-    /* ------------------------------------------------------------------
-       Reporting helpers
-       ------------------------------------------------------------------ */
     private static void filterTransactionsByDate(LocalDate start, LocalDate end) {
         for (Transaction t : transactions){
             String date = t.getDate();
@@ -322,14 +322,20 @@ public class FinancialTracker {
         
     }
 
-    /* ------------------------------------------------------------------
-       Utility parsers (you can reuse in many places)
-       ------------------------------------------------------------------ */
     private static LocalDate parseDate(String s) {
-       return LocalDate.parse(s);
+       try {
+           return LocalDate.parse(s);
+       }
+           catch (DateTimeParseException e){
+           return null;
+           }
     }
 
     private static Double parseDouble(String s) {
-        return Double.parseDouble(s);
+        try {
+            return Double.parseDouble(s);
+        } catch (NumberFormatException e){
+            return null;
+        }
     }
 }
